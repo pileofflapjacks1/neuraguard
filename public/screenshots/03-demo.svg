@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675" role="img" aria-label="NeuraGuard demo tour">
+  <rect width="1200" height="675" fill="#070a0f"/>
+  <rect x="0" y="0" width="1200" height="34" fill="#451a03"/>
+  <text x="600" y="22" fill="#fde68a" font-family="system-ui,sans-serif" font-size="13" text-anchor="middle">Research / simulation only · Not medical · Not Neuralink-affiliated</text>
+  <rect x="24" y="48" width="1152" height="48" rx="10" fill="#0f141c" stroke="#243041"/>
+  <text x="44" y="78" fill="#e8eef7" font-family="system-ui,sans-serif" font-size="18" font-weight="700">Neura<tspan fill="#22d3ee">Guard</tspan></text>
+  <rect x="220" y="60" width="150" height="24" rx="12" fill="#083344" stroke="#22d3ee" stroke-opacity="0.5"/>
+  <circle cx="238" cy="72" r="5" fill="#34d399"/>
+  <text x="250" y="76" fill="#a5f3fc" font-family="system-ui,sans-serif" font-size="11" font-weight="600">SIMULATOR MODE</text>
+  <text x="1140" y="78" fill="#67e8f9" font-family="system-ui,sans-serif" font-size="12" text-anchor="end">Demo</text>
+
+  <text x="40" y="140" fill="#e8eef7" font-family="system-ui,sans-serif" font-size="32" font-weight="700">Live demo tour</text>
+  <text x="40" y="175" fill="#8b9bb0" font-family="system-ui,sans-serif" font-size="16">Auto-starts synthetic stream · no accounts · no external services</text>
+
+  <rect x="40" y="200" width="220" height="36" rx="18" fill="#083344" stroke="#22d3ee" stroke-opacity="0.5"/>
+  <text x="150" y="223" fill="#a5f3fc" font-family="system-ui,sans-serif" font-size="13" font-weight="600" text-anchor="middle">Tour running · fatigue</text>
+
+  <!-- timeline -->
+  <rect x="40" y="260" width="1120" height="120" rx="16" fill="#0f141c" stroke="#243041"/>
+  <text x="64" y="295" fill="#8b9bb0" font-family="system-ui,sans-serif" font-size="12" font-weight="600">INJECTION TIMELINE</text>
+  <line x1="80" y1="330" x2="1120" y2="330" stroke="#243041" stroke-width="4"/>
+  <circle cx="160" cy="330" r="10" fill="#22d3ee"/>
+  <text x="160" y="360" fill="#e8eef7" font-family="system-ui,sans-serif" font-size="11" text-anchor="middle">baseline</text>
+  <circle cx="360" cy="330" r="10" fill="#fbbf24"/>
+  <text x="360" y="360" fill="#e8eef7" font-family="system-ui,sans-serif" font-size="11" text-anchor="middle">distraction</text>
+  <circle cx="560" cy="330" r="10" fill="#a78bfa"/>
+  <text x="560" y="360" fill="#e8eef7" font-family="system-ui,sans-serif" font-size="11" text-anchor="middle">private</text>
+  <circle cx="760" cy="330" r="12" fill="#f87171" stroke="#fecaca" stroke-width="2"/>
+  <text x="760" y="360" fill="#fecaca" font-family="system-ui,sans-serif" font-size="11" font-weight="600" text-anchor="middle">fatigue</text>
+  <circle cx="960" cy="330" r="10" fill="#c084fc"/>
+  <text x="960" y="360" fill="#e8eef7" font-family="system-ui,sans-serif" font-size="11" text-anchor="middle">anomaly</text>
+  <circle cx="1100" cy="330" r="10" fill="#34d399"/>
+  <text x="1100" y="360" fill="#e8eef7" font-family="system-ui,sans-serif" font-size="11" text-anchor="middle">recover</text>
+
+  <!-- policy chips during fatigue -->
+  <rect x="40" y="410" width="1120" height="180" rx="16" fill="#0f141c" stroke="#243041"/>
+  <text x="64" y="445" fill="#e8eef7" font-family="system-ui,sans-serif" font-size="14" font-weight="600">Policies firing (demo snapshot)</text>
+  <rect x="64" y="470" width="180" height="32" rx="16" fill="#78350f" stroke="#f59e0b"/>
+  <text x="154" y="491" fill="#fde68a" font-family="system-ui,sans-serif" font-size="12" font-weight="600" text-anchor="middle">Low-effort mode</text>
+  <rect x="260" y="470" width="160" height="32" rx="16" fill="#78350f" stroke="#f59e0b"/>
+  <text x="340" y="491" fill="#fde68a" font-family="system-ui,sans-serif" font-size="12" font-weight="600" text-anchor="middle">Throttle ×0.40</text>
+  <rect x="436" y="470" width="160" height="32" rx="16" fill="#2e1065" stroke="#7c3aed"/>
+  <text x="516" y="491" fill="#e9d5ff" font-family="system-ui,sans-serif" font-size="12" font-weight="600" text-anchor="middle">Private blocked</text>
+
+  <text x="64" y="540" fill="#a5f3fc" font-family="system-ui,sans-serif" font-size="13">throttle_bandwidth — Fatigue 68 ≥ 65</text>
+  <text x="64" y="565" fill="#a5f3fc" font-family="system-ui,sans-serif" font-size="13">low_effort_mode — reduced intention bandwidth</text>
+
+  <text x="40" y="640" fill="#475569" font-family="system-ui,sans-serif" font-size="12">Entrypoint: /demo · Beach catalog showcase path</text>
+</svg>

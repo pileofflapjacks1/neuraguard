@@ -1,0 +1,172 @@
+@import "tailwindcss";
+
+:root {
+  --guard-bg: #070a0f;
+  --guard-panel: #0f141c;
+  --guard-panel-2: #141b26;
+  --guard-border: #243041;
+  --guard-fg: #e8eef7;
+  --guard-muted: #8b9bb0;
+  --guard-accent: #22d3ee;
+  --guard-accent-dim: rgba(34, 211, 238, 0.15);
+  --guard-warn: #fbbf24;
+  --guard-danger: #f87171;
+  --guard-ok: #34d399;
+  --background: var(--guard-bg);
+  --foreground: var(--guard-fg);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-guard-bg: var(--guard-bg);
+  --color-guard-panel: var(--guard-panel);
+  --color-guard-panel-2: var(--guard-panel-2);
+  --color-guard-border: var(--guard-border);
+  --color-guard-fg: var(--guard-fg);
+  --color-guard-muted: var(--guard-muted);
+  --color-guard-accent: var(--guard-accent);
+  --color-guard-warn: var(--guard-warn);
+  --color-guard-danger: var(--guard-danger);
+  --color-guard-ok: var(--guard-ok);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background: var(--guard-bg);
+  color: var(--guard-fg);
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+}
+
+/* Focus rings — a11y first */
+:focus-visible {
+  outline: 2px solid #67e8f9;
+  outline-offset: 2px;
+}
+
+.guard-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--guard-border);
+  font-weight: 600;
+  padding: 0.55rem 0.95rem;
+  min-height: 2.75rem;
+  transition:
+    background-color 0.12s ease,
+    border-color 0.12s ease,
+    color 0.12s ease;
+  cursor: pointer;
+}
+
+.guard-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.guard-btn-primary {
+  border-color: rgba(34, 211, 238, 0.45);
+  background: rgba(8, 145, 178, 0.35);
+  color: #ecfeff;
+}
+
+.guard-btn-primary:hover:not(:disabled) {
+  background: rgba(8, 145, 178, 0.55);
+}
+
+.guard-btn-secondary {
+  background: var(--guard-panel);
+  color: var(--guard-fg);
+}
+
+.guard-btn-secondary:hover:not(:disabled) {
+  background: #17202b;
+}
+
+.guard-btn-danger {
+  border-color: rgba(248, 113, 113, 0.5);
+  background: rgba(127, 29, 29, 0.4);
+  color: #fecaca;
+}
+
+.guard-btn-danger:hover:not(:disabled) {
+  background: rgba(153, 27, 27, 0.55);
+}
+
+.guard-btn-ghost {
+  background: transparent;
+  color: var(--guard-muted);
+}
+
+.guard-btn-ghost:hover:not(:disabled) {
+  background: var(--guard-panel);
+  color: var(--guard-fg);
+}
+
+.guard-input {
+  border-radius: 0.75rem;
+  border: 1px solid var(--guard-border);
+  background: var(--guard-bg);
+  color: var(--guard-fg);
+  padding: 0.65rem 0.85rem;
+  min-height: 2.75rem;
+  font-size: 0.95rem;
+  width: 100%;
+}
+
+.guard-input:focus {
+  outline: 2px solid #67e8f9;
+  outline-offset: 1px;
+}
+
+.guard-card {
+  border-radius: 1rem;
+  border: 1px solid var(--guard-border);
+  background: var(--guard-panel);
+  padding: 1rem 1.1rem;
+}
+
+.guard-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--guard-muted);
+}
+
+.kbd {
+  display: inline-block;
+  border-radius: 0.35rem;
+  border: 1px solid var(--guard-border);
+  background: var(--guard-bg);
+  padding: 0.1rem 0.4rem;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 0.8em;
+  color: #a5f3fc;
+}
+
+a {
+  color: #67e8f9;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

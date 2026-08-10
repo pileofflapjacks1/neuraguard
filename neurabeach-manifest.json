@@ -1,0 +1,45 @@
+{
+  "manifest_version": "1.0.0",
+  "name": "neuraguard",
+  "display_name": "NeuraGuard",
+  "version": "0.1.0",
+  "description": "Continuous neural-state awareness and safety layer for intention streams: fatigue manager, privacy gate, adaptive throttle, anomaly pause. Simulator-first MindGuard MVP. Not implant software. Not a medical device. Not affiliated with Neuralink.",
+  "safety_class": "computer_side",
+  "runtime": "web",
+  "category": "research",
+  "featured": true,
+  "collection": "col-neura-suite",
+  "suite_role": "app",
+  "depends_on": [],
+  "inputs": [
+    "velocity_2d",
+    "class_label",
+    "synthetic"
+  ],
+  "outputs": ["ui_only", "file_export"],
+  "hardware": [
+    "synthetic",
+    "generic_intent",
+    "websocket_intent"
+  ],
+  "adapter_maturity": "simulator_only",
+  "permissions": ["none"],
+  "dof": "stream_monitor",
+  "latency_class": "interactive",
+  "platforms": ["web", "macos", "windows", "linux"],
+  "calibration": "optional",
+  "entrypoint": "https://neuraguard.vercel.app/demo",
+  "demo_video_url": "https://neuraguard.vercel.app/demo",
+  "a11y_url": "https://neuraguard.vercel.app/a11y",
+  "screenshots": [
+    "https://neuraguard.vercel.app/screenshots/01-dashboard.svg",
+    "https://neuraguard.vercel.app/screenshots/02-policies.svg",
+    "https://neuraguard.vercel.app/screenshots/03-demo.svg",
+    "https://neuraguard.vercel.app/screenshots/04-privacy.svg",
+    "https://neuraguard.vercel.app/screenshots/05-a11y.svg",
+    "https://neuraguard.vercel.app/og.svg"
+  ],
+  "repository": "https://github.com/pileofflapjacks1/neuraguard",
+  "license": "MIT",
+  "banned_claims": true
+}

@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675" role="img" aria-label="NeuraGuard live dashboard">
+  <rect width="1200" height="675" fill="#070a0f"/>
+  <!-- disclaimer strip -->
+  <rect x="0" y="0" width="1200" height="34" fill="#451a03"/>
+  <text x="600" y="22" fill="#fde68a" font-family="system-ui,sans-serif" font-size="13" text-anchor="middle">Research / simulation only · Not medical · Not Neuralink-affiliated</text>
+  <!-- top bar -->
+  <rect x="24" y="48" width="1152" height="48" rx="10" fill="#0f141c" stroke="#243041"/>
+  <text x="44" y="78" fill="#e8eef7" font-family="system-ui,sans-serif" font-size="18" font-weight="700">Neura<tspan fill="#22d3ee">Guard</tspan></text>
+  <rect x="220" y="60" width="150" height="24" rx="12" fill="#083344" stroke="#22d3ee" stroke-opacity="0.5"/>
+  <circle cx="238" cy="72" r="5" fill="#34d399"/>
+  <text x="250" y="76" fill="#a5f3fc" font-family="system-ui,sans-serif" font-size="11" font-weight="600">SIMULATOR MODE</text>
+  <text x="1140" y="78" fill="#8b9bb0" font-family="system-ui,sans-serif" font-size="12" text-anchor="end">Live Dashboard</text>
+  <!-- title -->
+  <text x="40" y="130" fill="#e8eef7" font-family="system-ui,sans-serif" font-size="28" font-weight="700">Live Dashboard</text>
+  <text x="40" y="156" fill="#8b9bb0" font-family="system-ui,sans-serif" font-size="14">Cognitive state · policy firewall · privacy gate</text>
+  <!-- gauges row -->
+  <g font-family="system-ui,sans-serif">
+    <!-- load -->
+    <rect x="40" y="180" width="170" height="150" rx="14" fill="#0f141c" stroke="#243041"/>
+    <text x="125" y="206" fill="#8b9bb0" font-size="11" font-weight="600" text-anchor="middle">COGNITIVE LOAD</text>
+    <circle cx="125" cy="260" r="36" fill="none" stroke="#1e293b" stroke-width="8"/>
+    <circle cx="125" cy="260" r="36" fill="none" stroke="#fbbf24" stroke-width="8" stroke-dasharray="140 226" stroke-linecap="round" transform="rotate(-90 125 260)"/>
+    <text x="125" y="268" fill="#e8eef7" font-size="22" font-weight="700" text-anchor="middle">42</text>
+    <!-- focus -->
+    <rect x="226" y="180" width="170" height="150" rx="14" fill="#0f141c" stroke="#243041"/>
+    <text x="311" y="206" fill="#8b9bb0" font-size="11" font-weight="600" text-anchor="middle">FOCUS</text>
+    <circle cx="311" cy="260" r="36" fill="none" stroke="#1e293b" stroke-width="8"/>
+    <circle cx="311" cy="260" r="36" fill="none" stroke="#34d399" stroke-width="8" stroke-dasharray="170 226" stroke-linecap="round" transform="rotate(-90 311 260)"/>
+    <text x="311" y="268" fill="#e8eef7" font-size="22" font-weight="700" text-anchor="middle">74</text>
+    <!-- fatigue -->
+    <rect x="412" y="180" width="170" height="150" rx="14" fill="#0f141c" stroke="#243041"/>
+    <text x="497" y="206" fill="#8b9bb0" font-size="11" font-weight="600" text-anchor="middle">FATIGUE</text>
+    <circle cx="497" cy="260" r="36" fill="none" stroke="#1e293b" stroke-width="8"/>
+    <circle cx="497" cy="260" r="36" fill="none" stroke="#f87171" stroke-width="8" stroke-dasharray="90 226" stroke-linecap="round" transform="rotate(-90 497 260)"/>
+    <text x="497" y="268" fill="#e8eef7" font-size="22" font-weight="700" text-anchor="middle">28</text>
+    <!-- agency -->
+    <rect x="598" y="180" width="170" height="150" rx="14" fill="#0f141c" stroke="#243041"/>
+    <text x="683" y="206" fill="#8b9bb0" font-size="11" font-weight="600" text-anchor="middle">AGENCY</text>
+    <circle cx="683" cy="260" r="36" fill="none" stroke="#1e293b" stroke-width="8"/>
+    <circle cx="683" cy="260" r="36" fill="none" stroke="#22d3ee" stroke-width="8" stroke-dasharray="180 226" stroke-linecap="round" transform="rotate(-90 683 260)"/>
+    <text x="683" y="268" fill="#e8eef7" font-size="22" font-weight="700" text-anchor="middle">81</text>
+    <!-- anomaly -->
+    <rect x="784" y="180" width="170" height="150" rx="14" fill="#0f141c" stroke="#243041"/>
+    <text x="869" y="206" fill="#8b9bb0" font-size="11" font-weight="600" text-anchor="middle">ANOMALY</text>
+    <circle cx="869" cy="260" r="36" fill="none" stroke="#1e293b" stroke-width="8"/>
+    <circle cx="869" cy="260" r="36" fill="none" stroke="#c084fc" stroke-width="8" stroke-dasharray="40 226" stroke-linecap="round" transform="rotate(-90 869 260)"/>
+    <text x="869" y="268" fill="#e8eef7" font-size="22" font-weight="700" text-anchor="middle">12</text>
+    <!-- bio -->
+    <rect x="970" y="180" width="170" height="150" rx="14" fill="#0f141c" stroke="#243041"/>
+    <text x="1055" y="206" fill="#8b9bb0" font-size="11" font-weight="600" text-anchor="middle">BIO MATCH</text>
+    <circle cx="1055" cy="260" r="36" fill="none" stroke="#1e293b" stroke-width="8"/>
+    <circle cx="1055" cy="260" r="36" fill="none" stroke="#34d399" stroke-width="8" stroke-dasharray="200 226" stroke-linecap="round" transform="rotate(-90 1055 260)"/>
+    <text x="1055" y="268" fill="#e8eef7" font-size="22" font-weight="700" text-anchor="middle">88</text>
+  </g>
+  <!-- stream + policy panels -->
+  <rect x="40" y="350" width="560" height="240" rx="14" fill="#0f141c" stroke="#243041"/>
+  <text x="60" y="380" fill="#e8eef7" font-family="system-ui,sans-serif" font-size="14" font-weight="600">Intention stream</text>
+  <rect x="60" y="400" width="120" height="36" rx="10" fill="#0e7490"/>
+  <text x="120" y="423" fill="#ecfeff" font-family="system-ui,sans-serif" font-size="13" font-weight="600" text-anchor="middle">Start stream</text>
+  <rect x="196" y="400" width="100" height="36" rx="10" fill="#17202b" stroke="#243041"/>
+  <text x="246" y="423" fill="#e8eef7" font-family="system-ui,sans-serif" font-size="13" font-weight="600" text-anchor="middle">Fatigue</text>
+  <rect x="310" y="400" width="120" height="36" rx="10" fill="#17202b" stroke="#243041"/>
+  <text x="370" y="423" fill="#e8eef7" font-family="system-ui,sans-serif" font-size="13" font-weight="600" text-anchor="middle">Private spike</text>
+  <text x="60" y="470" fill="#8b9bb0" font-family="ui-monospace,monospace" font-size="12">vx=0.32  vy=-0.18  class=pointer</text>
+  <text x="60" y="495" fill="#6ee7b7" font-family="ui-monospace,monospace" font-size="12">gated ✓  bandwidth ×1.00</text>
+  <text x="60" y="540" fill="#67e8f9" font-family="system-ui,sans-serif" font-size="12">synthetic · 20 Hz · inject scenarios for demos</text>
+
+  <rect x="620" y="350" width="520" height="240" rx="14" fill="#0f141c" stroke="#243041"/>
+  <text x="640" y="380" fill="#e8eef7" font-family="system-ui,sans-serif" font-size="14" font-weight="600">Policy status</text>
+  <rect x="640" y="400" width="140" height="28" rx="14" fill="#052e16" stroke="#166534"/>
+  <text x="710" y="419" fill="#bbf7d0" font-family="system-ui,sans-serif" font-size="12" font-weight="600" text-anchor="middle">All clear</text>
+  <rect x="796" y="400" width="150" height="28" rx="14" fill="#2e1065" stroke="#7c3aed"/>
+  <text x="871" y="419" fill="#e9d5ff" font-family="system-ui,sans-serif" font-size="12" font-weight="600" text-anchor="middle">Private blocked</text>
+  <text x="640" y="460" fill="#8b9bb0" font-family="system-ui,sans-serif" font-size="12">Last actions</text>
+  <text x="640" y="488" fill="#a5f3fc" font-family="system-ui,sans-serif" font-size="13">block_private — Privacy gate active</text>
+  <text x="640" y="540" fill="#8b9bb0" font-family="system-ui,sans-serif" font-size="12">Throttle · breaks · lock on thresholds</text>
+
+  <text x="40" y="640" fill="#475569" font-family="system-ui,sans-serif" font-size="12">neuraguard.vercel.app · col-neura-suite · computer_side</text>
+</svg>

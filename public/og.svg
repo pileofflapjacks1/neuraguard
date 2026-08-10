@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <rect width="1200" height="630" fill="#070a0f"/>
+  <rect x="0" y="0" width="8" height="630" fill="#22d3ee"/>
+  <text x="72" y="150" fill="#e8eef7" font-family="system-ui,sans-serif" font-size="64" font-weight="800">NeuraGuard</text>
+  <text x="72" y="210" fill="#67e8f9" font-family="system-ui,sans-serif" font-size="28" font-weight="600">Continuous neural-state firewall</text>
+  <text x="72" y="270" fill="#8b9bb0" font-family="system-ui,sans-serif" font-size="22">Fatigue · Privacy gate · Agency · Anomaly policies</text>
+  <text x="72" y="360" fill="#94a3b8" font-family="system-ui,sans-serif" font-size="18">Simulator-first · Not implant software · Not a medical device</text>
+  <text x="72" y="400" fill="#94a3b8" font-family="system-ui,sans-serif" font-size="18">Not affiliated with Neuralink · Joe’s Neura Suite</text>
+  <circle cx="980" cy="250" r="88" fill="none" stroke="#22d3ee" stroke-width="6"/>
+  <circle cx="980" cy="250" r="58" fill="none" stroke="#34d399" stroke-width="8" stroke-dasharray="260 100"/>
+  <text x="980" y="242" text-anchor="middle" fill="#e8eef7" font-family="ui-monospace,monospace" font-size="18" font-weight="700">SIM</text>
+  <text x="980" y="268" text-anchor="middle" fill="#67e8f9" font-family="system-ui,sans-serif" font-size="14">MODE</text>
+  <text x="72" y="520" fill="#475569" font-family="system-ui,sans-serif" font-size="16">MVP 0.1.0 · neuraguard.vercel.app/demo · neurabeach.com</text>
+  <text x="72" y="560" fill="#334155" font-family="system-ui,sans-serif" font-size="14">MindGuard research name · col-neura-suite</text>
+</svg>

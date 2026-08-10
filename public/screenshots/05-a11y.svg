@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675" role="img" aria-label="NeuraGuard accessibility scorecard">
+  <rect width="1200" height="675" fill="#070a0f"/>
+  <rect x="0" y="0" width="1200" height="34" fill="#451a03"/>
+  <text x="600" y="22" fill="#fde68a" font-family="system-ui,sans-serif" font-size="13" text-anchor="middle">Research / simulation only · Not medical · Not Neuralink-affiliated</text>
+  <rect x="24" y="48" width="1152" height="48" rx="10" fill="#0f141c" stroke="#243041"/>
+  <text x="44" y="78" fill="#e8eef7" font-family="system-ui,sans-serif" font-size="18" font-weight="700">Neura<tspan fill="#22d3ee">Guard</tspan></text>
+  <text x="1140" y="78" fill="#67e8f9" font-family="system-ui,sans-serif" font-size="12" text-anchor="end">A11y</text>
+
+  <text x="40" y="140" fill="#e8eef7" font-family="system-ui,sans-serif" font-size="28" font-weight="700">Accessibility scorecard</text>
+  <text x="40" y="170" fill="#8b9bb0" font-family="system-ui,sans-serif" font-size="14">Light static + live checks · not a full WCAG audit</text>
+
+  <rect x="40" y="200" width="280" height="160" rx="16" fill="#0f141c" stroke="#243041"/>
+  <text x="64" y="240" fill="#8b9bb0" font-family="system-ui,sans-serif" font-size="13">Score</text>
+  <text x="64" y="300" fill="#67e8f9" font-family="system-ui,sans-serif" font-size="56" font-weight="800">100%</text>
+  <text x="64" y="335" fill="#8b9bb0" font-family="system-ui,sans-serif" font-size="13">12/12 checks passing</text>
+
+  <rect x="340" y="200" width="800" height="380" rx="16" fill="#0f141c" stroke="#243041"/>
+  <text x="364" y="240" fill="#e8eef7" font-family="system-ui,sans-serif" font-size="14" font-weight="600">Checks</text>
+
+  <g font-family="system-ui,sans-serif" font-size="13">
+    <circle cx="380" cy="280" r="7" fill="#34d399"/>
+    <text x="400" y="285" fill="#e8eef7">Persistent disclaimer banner (non-dismissible)</text>
+    <circle cx="380" cy="315" r="7" fill="#34d399"/>
+    <text x="400" y="320" fill="#e8eef7">Simulator Mode badge always visible</text>
+    <circle cx="380" cy="350" r="7" fill="#34d399"/>
+    <text x="400" y="355" fill="#e8eef7">Keyboard-focusable controls · :focus-visible rings</text>
+    <circle cx="380" cy="385" r="7" fill="#34d399"/>
+    <text x="400" y="390" fill="#e8eef7">Gauge meters expose aria-valuenow / valuetext</text>
+    <circle cx="380" cy="420" r="7" fill="#34d399"/>
+    <text x="400" y="425" fill="#e8eef7">Large hit targets (≥ ~44px buttons)</text>
+    <circle cx="380" cy="455" r="7" fill="#34d399"/>
+    <text x="400" y="460" fill="#e8eef7">High-contrast dark theme · cyan accents</text>
+    <circle cx="380" cy="490" r="7" fill="#34d399"/>
+    <text x="400" y="495" fill="#e8eef7">prefers-reduced-motion respected in CSS</text>
+    <circle cx="380" cy="525" r="7" fill="#34d399"/>
+    <text x="400" y="530" fill="#e8eef7">Policy status live region (aria-live polite)</text>
+  </g>
+
+  <text x="40" y="640" fill="#475569" font-family="system-ui,sans-serif" font-size="12">/a11y · suite convention parity with NeuraShell / NeuraBinder</text>
+</svg>
