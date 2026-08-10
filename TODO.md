@@ -19,10 +19,10 @@
 
 ## Ship checklist
 
-- [ ] First commit + push to `pileofflapjacks1/neuraguard`
-- [ ] Deploy Vercel → confirm hostname (update LISTING/manifest if not `neuraguard.vercel.app`)
-- [ ] Smoke live `/demo`, `/a11y`, screenshot URLs (200)
-- [ ] Seed NeuraBeach `col-neura-suite` from LISTING + manifest
+- [x] First commit + push to `pileofflapjacks1/neuraguard`
+- [x] Deploy Vercel → `https://neuraguard.vercel.app`
+- [x] Smoke live `/demo`, `/a11y`, screenshot URLs (200)
+- [x] Seed NeuraBeach `col-neura-suite` from LISTING + manifest
 
 ## Later
 

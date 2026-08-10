@@ -9,7 +9,7 @@
 | **Slug** | `neuraguard` |
 | **Title** | NeuraGuard |
 | **Version** | `0.1.0` |
-| **Category** | `research` |
+| **Category** | `research_utility` |
 | **Featured** | yes |
 | **Collection** | `col-neura-suite` |
 | **Suite role** | `app` (neural-state firewall / MindGuard) |
@@ -145,9 +145,6 @@ No env secrets required for demo mode. Optional: `NEXT_PUBLIC_SITE_URL=https://n
 
 ## Beach re-seed note
 
-**Not yet seeded** — first ship. After deploy:
+**Seeded** as `seed-proj-neuraguard` in `col-neura-suite` (demo mode seed-data). Live demo hostname: `neuraguard.vercel.app`.
 
-1. Confirm live hostname (update this LISTING + `neurabeach-manifest.json` if not `neuraguard.vercel.app`).
-2. Smoke `/demo`, `/a11y`, and screenshot URLs return 200.
-3. Seed Beach from this LISTING + manifest (add `seed-proj-neuraguard` in the Beach repo when ready).
-4. Set **featured** on the card in `col-neura-suite` to match suite peers.
+On catalog updates, sync Beach seed from this LISTING + `neurabeach-manifest.json` (version, screenshots, short description).
