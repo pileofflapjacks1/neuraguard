@@ -14,8 +14,8 @@
 
 ## Ship 0.3.0
 
-- [ ] Commit + push
-- [ ] Redeploy Vercel
+- [x] Commit + push
+- [x] Redeploy Vercel
 - [ ] Re-seed Beach version/description
 
 ## Next (privacy roadmap)
