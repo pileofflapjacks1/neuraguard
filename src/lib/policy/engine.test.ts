@@ -19,6 +19,9 @@ function state(partial: Partial<CognitiveState> = {}): CognitiveState {
     agency: 80,
     anomalyScore: 10,
     biometricMatch: 90,
+    driftAdapting: false,
+    baselineDrift: 0,
+    stableTicks: 0,
     ...partial,
   };
 }
@@ -28,7 +31,7 @@ describe("policy engine", () => {
     const result = evaluatePolicies(
       state({ fatigue: 70 }),
       DEFAULT_THRESHOLDS,
-      { ...DEFAULT_PRIVACY, unlocked: true },
+      { ...DEFAULT_PRIVACY, unlocked: true, mode: "unlocked", gateActive: false },
       createPolicyEngineState(),
       false,
     );
@@ -43,7 +46,7 @@ describe("policy engine", () => {
     const result = evaluatePolicies(
       state({ fatigue: 90 }),
       DEFAULT_THRESHOLDS,
-      { ...DEFAULT_PRIVACY, unlocked: true },
+      { ...DEFAULT_PRIVACY, unlocked: true, mode: "unlocked", gateActive: false },
       createPolicyEngineState(),
       false,
     );
@@ -56,7 +59,7 @@ describe("policy engine", () => {
     const result = evaluatePolicies(
       state({ agency: 20 }),
       DEFAULT_THRESHOLDS,
-      { ...DEFAULT_PRIVACY, unlocked: true },
+      { ...DEFAULT_PRIVACY, unlocked: true, mode: "unlocked", gateActive: false },
       createPolicyEngineState(),
       false,
     );
@@ -65,15 +68,16 @@ describe("policy engine", () => {
     expect(result.allowClass("pointer")).toBe(true);
   });
 
-  it("blocks private classes when gate active and locked", () => {
+  it("blocks private classes when sealed", () => {
     const result = evaluatePolicies(
       state(),
       DEFAULT_THRESHOLDS,
-      { ...DEFAULT_PRIVACY, gateActive: true, unlocked: false },
+      { ...DEFAULT_PRIVACY, mode: "sealed", gateActive: true, unlocked: false },
       createPolicyEngineState(),
       false,
     );
     expect(result.bandwidth.privateBlocked).toBe(true);
+    expect(result.bandwidth.privacyMode).toBe("sealed");
     expect(result.allowClass("inner_speech")).toBe(false);
     expect(result.allowClass("pointer")).toBe(true);
   });
@@ -82,7 +86,12 @@ describe("policy engine", () => {
     const result = evaluatePolicies(
       state(),
       DEFAULT_THRESHOLDS,
-      { ...DEFAULT_PRIVACY, gateActive: true, unlocked: true },
+      {
+        ...DEFAULT_PRIVACY,
+        mode: "unlocked",
+        gateActive: false,
+        unlocked: true,
+      },
       createPolicyEngineState(),
       false,
     );
@@ -93,7 +102,7 @@ describe("policy engine", () => {
     const result = evaluatePolicies(
       state(),
       DEFAULT_THRESHOLDS,
-      { ...DEFAULT_PRIVACY, unlocked: true },
+      { ...DEFAULT_PRIVACY, unlocked: true, mode: "unlocked", gateActive: false },
       createPolicyEngineState(),
       true,
     );
@@ -108,7 +117,7 @@ describe("policy engine", () => {
     const result = evaluatePolicies(
       state({ t: now, cognitiveLoad: 80, fatigue: 40 }),
       DEFAULT_THRESHOLDS,
-      { ...DEFAULT_PRIVACY, unlocked: true },
+      { ...DEFAULT_PRIVACY, unlocked: true, mode: "unlocked", gateActive: false },
       engine,
       false,
     );

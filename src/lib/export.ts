@@ -1,32 +1,75 @@
 /**
- * Session log export — JSON / CSV.
+ * Session log export — JSON / CSV with privacy airlock redaction.
  */
 
-import type { CognitiveState, PolicyAction, SessionLogEntry } from "@/lib/types";
+import type {
+  CognitiveState,
+  IntentionSample,
+  PolicyAction,
+  PrivacySettings,
+  SessionLogEntry,
+} from "@/lib/types";
 import { downloadBlob } from "@/lib/utils";
+import {
+  redactLogEntry,
+  redactSampleForExport,
+  resolvePrivacyMode,
+  sinkAllowed,
+} from "@/lib/privacy/airlock";
 
 export interface ExportBundle {
   exportedAt: string;
-  disclaimer:
-    "NeuraGuard research simulation only. Not a medical device. Not implant software. Not affiliated with Neuralink.";
+  disclaimer: string;
+  privacyMode: string;
+  redacted: boolean;
   states: CognitiveState[];
   policies: PolicyAction[];
   log: SessionLogEntry[];
+  samples?: IntentionSample[];
 }
+
+const DISCLAIMER =
+  "NeuraGuard research simulation only. Not a medical device. Not implant software. Not affiliated with Neuralink. Privacy airlock is computer-side intention-class containment — not implant encryption.";
 
 export function buildExportBundle(
   states: CognitiveState[],
   policies: PolicyAction[],
   log: SessionLogEntry[],
+  privacy?: PrivacySettings,
+  samples?: IntentionSample[],
 ): ExportBundle {
+  const mode = privacy ? resolvePrivacyMode(privacy) : "unlocked";
+  const shouldRedact =
+    !!privacy &&
+    (privacy.alwaysRedactExports || mode !== "unlocked");
+
+  const safeLog = privacy
+    ? log.map((e) => redactLogEntry(e, privacy))
+    : log;
+
+  let safeSamples: IntentionSample[] | undefined;
+  if (samples && privacy) {
+    safeSamples = samples
+      .map((s) => redactSampleForExport(s, privacy))
+      .filter((s): s is IntentionSample => s != null);
+  }
+
   return {
     exportedAt: new Date().toISOString(),
-    disclaimer:
-      "NeuraGuard research simulation only. Not a medical device. Not implant software. Not affiliated with Neuralink.",
+    disclaimer: DISCLAIMER,
+    privacyMode: mode,
+    redacted: shouldRedact,
     states,
     policies,
-    log,
+    log: safeLog,
+    samples: safeSamples,
   };
+}
+
+export function canExport(
+  privacy: PrivacySettings,
+): { allow: boolean; reason: string } {
+  return sinkAllowed("export", privacy);
 }
 
 export function exportJson(bundle: ExportBundle): void {

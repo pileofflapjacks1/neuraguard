@@ -37,16 +37,23 @@ export const FORMULA_DOCS = {
   anomaly: {
     name: "Anomaly Score",
     formula:
-      "anomaly = 100 * clamp(0.4*z(speed) + 0.3*z(entropy) + 0.3*z(confidence_drop))",
+      "raw = 100 * clamp(0.4*z(speed) + 0.3*z(entropy) + 0.3*z(confidence_drop)); anomaly = EMA(prev, raw, α≈0.18)",
     notes:
-      "Z-scores vs rolling baseline. Sudden distribution shifts raise the score.",
+      "Z-scores vs rolling window. EMA hysteresis reduces flapping on brief spikes. Not clinical.",
   },
   biometric: {
     name: "Neural-biometric match",
     formula:
       "match = 100 * (1 - clamp(0.5*|μ_speed - base| + 0.3*|μ_entropy - base| + 0.2*|μ_conf - base|))",
     notes:
-      "Toy continuous auth: compares current window stats to a short baseline capture. Not identity verification.",
+      "Toy continuous auth: compares current window stats to baseline (initial capture + optional drift). Not identity verification.",
+  },
+  drift: {
+    name: "Online baseline drift adaptation",
+    formula:
+      "if anomalyEma < driftAnomalyMax for ≥ driftStableTicks: base ← EMA(base, features, α_drift≈0.008); else freeze base",
+    notes:
+      "Tracks slow non-stationarity so long sessions don’t false-lock. Freezes during high anomaly / anomaly injection so sudden shifts still fire policies.",
   },
 } as const;
 

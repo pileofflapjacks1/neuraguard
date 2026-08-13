@@ -1,7 +1,8 @@
 /**
  * State estimator: StreamFeatures → CognitiveState
  *
- * Sliding-window stats + EMAs. Fully inspectable — see formulas.ts.
+ * Sliding-window stats + EMAs + online baseline drift adaptation.
+ * Fully inspectable — see formulas.ts.
  * Simulation / research only. Not a medical or clinical model.
  */
 
@@ -18,6 +19,19 @@ export interface EstimatorConfig {
   sessionStart: number;
   /** Expected "full day" fatigue horizon (ms) — demo uses shorter */
   fatigueHorizonMs: number;
+  /**
+   * When true, slowly adapt auth/anomaly baseline toward current features
+   * while the stream looks stable (low smoothed anomaly).
+   */
+  driftAdaptEnabled: boolean;
+  /** EMA alpha for baseline drift (very small = slow non-stationarity tracking) */
+  driftAlpha: number;
+  /** Smoothed anomaly (0–100) must stay below this to allow drift */
+  driftAnomalyMax: number;
+  /** Consecutive stable ticks required before drift steps */
+  driftStableTicks: number;
+  /** EMA alpha for anomaly hysteresis (reduces flap) */
+  anomalyAlpha: number;
 }
 
 export interface EstimatorInternal {
@@ -25,11 +39,21 @@ export interface EstimatorInternal {
   load: number;
   focus: number;
   agency: number;
+  /** Smoothed anomaly 0–100 for hysteresis / policy */
+  anomalyEma: number;
   /** Baseline feature means for biometric + anomaly */
   baseline: BaselineStats | null;
   /** Running means for z-scores */
   run: RunningStats;
   sampleCount: number;
+  /** Ticks in a row with low anomaly (for drift gate) */
+  stableTicks: number;
+  /** Last drift step applied */
+  lastDriftAt: number | null;
+  /** Cumulative |Δbaseline| proxy 0–100 for UI */
+  baselineDrift: number;
+  /** Whether last tick adapted the baseline */
+  lastDriftApplied: boolean;
 }
 
 export interface BaselineStats {
@@ -38,6 +62,8 @@ export interface BaselineStats {
   classEntropy: number;
   meanConfidence: number;
   samples: number;
+  /** Snapshot of running.n when baseline was first captured or last hard-reset */
+  capturedAtSamples: number;
 }
 
 interface RunningStats {
@@ -55,6 +81,11 @@ export const DEFAULT_ESTIMATOR_CONFIG: EstimatorConfig = {
   fastAlpha: 0.12,
   sessionStart: Date.now(),
   fatigueHorizonMs: 20 * 60_000, // 20 min demo horizon
+  driftAdaptEnabled: true,
+  driftAlpha: 0.008,
+  driftAnomalyMax: 35,
+  driftStableTicks: 25,
+  anomalyAlpha: 0.18,
 };
 
 export function createEstimatorState(
@@ -72,9 +103,14 @@ export function createEstimatorState(
       load: 25,
       focus: 70,
       agency: 75,
+      anomalyEma: 5,
       baseline: null,
       run: emptyRunning(),
       sampleCount: 0,
+      stableTicks: 0,
+      lastDriftAt: null,
+      baselineDrift: 0,
+      lastDriftApplied: false,
     },
   };
 }
@@ -118,7 +154,7 @@ function zScore(x: number, mean: number, m2: number, n: number): number {
 
 /**
  * Capture baseline from current running stats (after warm-up).
- * Used for continuous auth match score.
+ * Used for continuous auth match score. Hard reset of drift meter.
  */
 export function captureBaseline(internal: EstimatorInternal): EstimatorInternal {
   if (internal.run.n < 10) return internal;
@@ -130,8 +166,38 @@ export function captureBaseline(internal: EstimatorInternal): EstimatorInternal 
       classEntropy: internal.run.meanEntropy,
       meanConfidence: internal.run.meanConf,
       samples: internal.run.n,
+      capturedAtSamples: internal.run.n,
     },
+    baselineDrift: 0,
+    lastDriftAt: Date.now(),
+    lastDriftApplied: false,
+    stableTicks: 0,
   };
+}
+
+/**
+ * Slowly move baseline toward current features (online drift adaptation).
+ * Only call when the stream is judged stable.
+ */
+export function adaptBaseline(
+  baseline: BaselineStats,
+  features: StreamFeatures,
+  alpha: number,
+): { baseline: BaselineStats; step: number } {
+  const a = clamp(alpha, 0, 1);
+  const next: BaselineStats = {
+    meanSpeed: ema(baseline.meanSpeed, features.meanSpeed, a),
+    speedVar: ema(baseline.speedVar, features.speedVar, a),
+    classEntropy: ema(baseline.classEntropy, features.classEntropy, a),
+    meanConfidence: ema(baseline.meanConfidence, features.meanConfidence, a),
+    samples: baseline.samples + 1,
+    capturedAtSamples: baseline.capturedAtSamples,
+  };
+  const step =
+    Math.abs(next.meanSpeed - baseline.meanSpeed) +
+    Math.abs(next.classEntropy - baseline.classEntropy) +
+    Math.abs(next.meanConfidence - baseline.meanConfidence);
+  return { baseline: next, step };
 }
 
 export function estimateState(
@@ -196,8 +262,10 @@ export function estimateState(
     rawFatigue = clamp(rawFatigue + 0.35, 0, 1);
   }
 
-  // Anomaly vs running distribution
-  let zSpeed = Math.abs(zScore(features.meanSpeed, run.meanSpeed, run.m2Speed, n));
+  // Anomaly vs running distribution (instant) + EMA hysteresis
+  let zSpeed = Math.abs(
+    zScore(features.meanSpeed, run.meanSpeed, run.m2Speed, n),
+  );
   let zEnt = Math.abs(
     zScore(features.classEntropy, run.meanEntropy, run.m2Entropy, n),
   );
@@ -208,11 +276,16 @@ export function estimateState(
     zSpeed += 4;
     zEnt += 3;
   }
-  const anomalyNorm = clamp((0.4 * zSpeed + 0.3 * zEnt + 0.3 * zConf) / 4, 0, 1);
+  const anomalyRaw = clamp((0.4 * zSpeed + 0.3 * zEnt + 0.3 * zConf) / 4, 0, 1);
+  const anomalyEma = ema(
+    internal.anomalyEma,
+    anomalyRaw * 100,
+    config.anomalyAlpha,
+  );
 
   const rawAgency = clamp(
     0.5 * features.meanConfidence +
-      0.3 * (1 - anomalyNorm) +
+      0.3 * (1 - anomalyEma / 100) +
       0.2 * (1 - features.privateRatio),
     0,
     1,
@@ -224,10 +297,54 @@ export function estimateState(
   const fatigue = ema(internal.fatigue, rawFatigue * 100, config.fatigueAlpha);
   const agency = ema(internal.agency, rawAgency * 100, config.fastAlpha);
 
-  // Biometric match vs captured baseline
+  // Auto-capture baseline after warm-up if missing
+  let baseline = internal.baseline;
+  let baselineDrift = internal.baselineDrift;
+  let lastDriftAt = internal.lastDriftAt;
+  let lastDriftApplied = false;
+  let stableTicks = internal.stableTicks;
+
+  if (!baseline && run.n >= 40) {
+    baseline = {
+      meanSpeed: run.meanSpeed,
+      speedVar: run.m2Speed / Math.max(1, run.n - 1),
+      classEntropy: run.meanEntropy,
+      meanConfidence: run.meanConf,
+      samples: run.n,
+      capturedAtSamples: run.n,
+    };
+    lastDriftAt = features.t;
+    baselineDrift = 0;
+    stableTicks = 0;
+  }
+
+  // Drift gate: only when enabled, baseline exists, stream stable, not under anomaly inject
+  const streamLooksStable =
+    anomalyEma < config.driftAnomalyMax && injection !== "anomaly";
+  if (streamLooksStable) {
+    stableTicks += 1;
+  } else {
+    stableTicks = 0;
+  }
+
+  if (
+    config.driftAdaptEnabled &&
+    baseline &&
+    streamLooksStable &&
+    stableTicks >= config.driftStableTicks
+  ) {
+    const adapted = adaptBaseline(baseline, features, config.driftAlpha);
+    baseline = adapted.baseline;
+    // Accumulate a bounded drift meter for UI (research proxy)
+    baselineDrift = clamp(baselineDrift + adapted.step * 40, 0, 100);
+    lastDriftAt = features.t;
+    lastDriftApplied = true;
+  }
+
+  // Biometric match vs (possibly drifted) baseline
   let biometricMatch = 85;
-  if (internal.baseline) {
-    const b = internal.baseline;
+  if (baseline) {
+    const b = baseline;
     const dSpeed = Math.abs(features.meanSpeed - b.meanSpeed);
     const dEnt = Math.abs(features.classEntropy - b.classEntropy);
     const dConf = Math.abs(features.meanConfidence - b.meanConfidence);
@@ -243,16 +360,15 @@ export function estimateState(
     load,
     focus,
     agency,
-    baseline: internal.baseline,
+    anomalyEma,
+    baseline,
     run,
     sampleCount: internal.sampleCount + 1,
+    stableTicks,
+    lastDriftAt,
+    baselineDrift,
+    lastDriftApplied,
   };
-
-  // Auto-capture baseline after warm-up if missing
-  const withBaseline =
-    !nextInternal.baseline && nextInternal.run.n >= 40
-      ? captureBaseline(nextInternal)
-      : nextInternal;
 
   return {
     state: {
@@ -261,9 +377,12 @@ export function estimateState(
       focus: clamp(focus, 0, 100),
       fatigue: clamp(fatigue, 0, 100),
       agency: clamp(agency, 0, 100),
-      anomalyScore: clamp(anomalyNorm * 100, 0, 100),
+      anomalyScore: clamp(anomalyEma, 0, 100),
       biometricMatch: clamp(biometricMatch, 0, 100),
+      driftAdapting: lastDriftApplied,
+      baselineDrift: clamp(baselineDrift, 0, 100),
+      stableTicks,
     },
-    internal: withBaseline,
+    internal: nextInternal,
   };
 }

@@ -8,6 +8,8 @@ import { PolicyStatusPanel } from "./policy-panel";
 import { AuthPanel } from "./auth-panel";
 import { SessionLogPanel } from "./session-log";
 import { HowItWorksPanel } from "./how-it-works-panel";
+import { DriftPanel } from "./drift-panel";
+import { PrivacyAirlockPanel } from "./privacy-airlock-panel";
 
 export function Dashboard() {
   const state = useGuardStore((s) => s.state);
@@ -20,9 +22,10 @@ export function Dashboard() {
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Live Dashboard</h1>
           <p className="mt-1 max-w-2xl text-sm text-guard-muted">
-            Continuous neural-state awareness and safety layer for intention
-            streams — agency, privacy, and fatigue management for long
-            simulator sessions.
+            Continuous neural-state firewall — fatigue, agency, and a{" "}
+            <strong className="text-violet-200">privacy airlock</strong> that
+            fail-closes private intention classes so they don’t leave this app
+            until you unlock. Research / simulation only.
           </p>
         </div>
         {features ? (
@@ -31,6 +34,7 @@ export function Dashboard() {
             {features.classEntropy.toFixed(2)} · conf=
             {features.meanConfidence.toFixed(2)} ·{" "}
             {features.dominantClass}
+            {state.driftAdapting ? " · drift↑" : ""}
           </div>
         ) : null}
       </div>
@@ -41,6 +45,10 @@ export function Dashboard() {
         <StreamControls />
         <PolicyStatusPanel />
       </div>
+
+      <PrivacyAirlockPanel />
+
+      <DriftPanel />
 
       <StateCharts history={history} />
 

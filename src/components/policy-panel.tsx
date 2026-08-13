@@ -47,9 +47,19 @@ export function PolicyStatusPanel() {
       tone: "text-rose-100 border-rose-400/60 bg-rose-950/60",
     },
     {
-      on: privacy.unlocked,
-      label: "Privacy unlocked",
+      on: privacy.mode === "unlocked" || privacy.unlocked,
+      label: "Airlock open",
       tone: "text-emerald-100 border-emerald-500/40 bg-emerald-950/40",
+    },
+    {
+      on: privacy.mode === "sealed",
+      label: "Airlock sealed",
+      tone: "text-violet-100 border-violet-500/40 bg-violet-950/40",
+    },
+    {
+      on: privacy.mode === "public_only",
+      label: "Public only",
+      tone: "text-amber-100 border-amber-500/40 bg-amber-950/40",
     },
   ];
 

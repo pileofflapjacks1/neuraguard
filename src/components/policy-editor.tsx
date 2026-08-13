@@ -139,21 +139,17 @@ export function PolicyEditor() {
 
         <div className="space-y-4">
           <div className="guard-card space-y-3">
-            <h2 className="text-sm font-semibold">Privacy gate</h2>
+            <h2 className="text-sm font-semibold">Privacy airlock classes</h2>
             <p className="text-xs text-guard-muted">
-              Mark intention classes as private. When the gate is active and
-              unlocked is false, those classes are blocked until a simulated
-              unlock intention / passphrase.
+              Mark intention classes as private. In <strong>sealed</strong> /
+              <strong> public only</strong> modes they fail-closed on the gated
+              stream. Use the dashboard Privacy airlock panel for mode + unlock
+              ceremony.
             </p>
-            <label className="flex items-center gap-2 text-sm">
-              <input
-                type="checkbox"
-                checked={privacy.gateActive}
-                onChange={(e) => setPrivacy({ gateActive: e.target.checked })}
-                className="h-4 w-4 accent-cyan-400"
-              />
-              Privacy gate active
-            </label>
+            <p className="text-xs text-guard-muted">
+              Current mode:{" "}
+              <span className="font-mono text-violet-200">{privacy.mode}</span>
+            </p>
             <label className="block space-y-1 text-sm">
               <span className="guard-label">Mental passphrase (demo)</span>
               <input

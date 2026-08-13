@@ -1,6 +1,6 @@
 # NeuraGuard
 
-**MVP 0.1.0** — continuous **neural-state firewall**, fatigue manager, and privacy gate for high-bandwidth intention streams.
+**MVP 0.3.0** — continuous **neural-state firewall** with a **privacy airlock** (fail-closed private intention classes), fatigue manager, and online baseline drift adaptation.
 
 Also known in research notes as **MindGuard**.
 

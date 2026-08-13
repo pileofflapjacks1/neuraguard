@@ -41,6 +41,14 @@ export default function DisclaimerPage() {
             control or external hardware unless you later wire a separate
             adapter under your own responsibility.
           </li>
+          <li>
+            <strong>Privacy airlock</strong> is computer-side{" "}
+            <em>intention-class containment</em> (block / redact private tags
+            before gated output, export, or untrusted sinks). It is{" "}
+            <strong>not</strong> implant encryption, not a VPN for Neuralink,
+            and does not claim to stop vendor clouds, firmware compromise, or
+            physical device attacks.
+          </li>
         </ul>
       </div>
 

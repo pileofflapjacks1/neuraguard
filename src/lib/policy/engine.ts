@@ -2,6 +2,8 @@
  * Policy engine: CognitiveState + thresholds → PolicyAction[] + BandwidthState
  *
  * Configurable, inspectable rules. Simulation only — no real implant control.
+ * Privacy fail-closed logic lives primarily in privacy/airlock.ts; this engine
+ * mirrors privateBlocked + allowClass for bandwidth/UI.
  */
 
 import type {
@@ -13,6 +15,7 @@ import type {
   IntentClass,
 } from "@/lib/types";
 import { SENSITIVE_CLASSES } from "@/lib/types";
+import { resolvePrivacyMode } from "@/lib/privacy/airlock";
 
 export interface PolicyEngineState {
   highLoadSince: number | null;
@@ -53,7 +56,8 @@ export function evaluatePolicies(
   let breakSuggested = false;
   let breakForced = false;
   let sensitivePaused = false;
-  const privateBlocked = privacy.gateActive && !privacy.unlocked;
+  const mode = resolvePrivacyMode(privacy);
+  const privateBlocked = mode !== "unlocked";
   let sessionLocked = engine.sessionLocked || authLocked;
 
   // Sustained high load tracking
@@ -150,8 +154,11 @@ export function evaluatePolicies(
 
   if (privateBlocked) {
     actions.push({
-      type: "block_private",
-      reason: "Privacy gate active — private classes locked",
+      type: mode === "sealed" ? "airlock_sealed" : "block_private",
+      reason:
+        mode === "sealed"
+          ? "Privacy airlock SEALED — private classes fail-closed"
+          : "Public-only mode — private classes blocked",
       t: now,
       severity: "info",
     });
@@ -179,6 +186,7 @@ export function evaluatePolicies(
     breakForced,
     sensitivePaused,
     privateBlocked,
+    privacyMode: mode,
   };
 
   const allowClass = (c: IntentClass): boolean => {

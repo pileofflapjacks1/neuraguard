@@ -27,9 +27,10 @@ North star: *Beach finds tools · Shell keeps you in control · Bridge shares in
 | Capability | Behavior |
 |------------|----------|
 | Live simulator | Synthetic intention stream + fatigue / distraction / private / anomaly injectors |
-| State estimates | Load, focus, fatigue, agency, anomaly, toy biometric match |
+| State estimates | Load, focus, fatigue, agency, anomaly (EMA hysteresis), toy biometric match |
+| Drift adaptation (0.2) | Slow baseline EMA when stable; freezes on high anomaly |
+| **Privacy airlock (0.3)** | Sealed / public-only / unlocked; fail-closed private classes; export redaction; audit |
 | Policy engine | Throttle bandwidth, low-effort mode, micro-breaks, pause sensitive |
-| Privacy gate | Mark classes private; block until simulated unlock |
 | Export | Session log → JSON / CSV |
 | Adapter stub | Neurabridge-shaped intention contract (soft, optional) |
 

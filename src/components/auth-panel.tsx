@@ -11,15 +11,15 @@ export function AuthPanel() {
   const biometric = useGuardStore((s) => s.state.biometricMatch);
   const unlockWithPassphrase = useGuardStore((s) => s.unlockWithPassphrase);
   const captureAuthBaseline = useGuardStore((s) => s.captureAuthBaseline);
-  const setPrivacy = useGuardStore((s) => s.setPrivacy);
   const lockSession = useGuardStore((s) => s.lockSession);
 
   function onUnlock(e: React.FormEvent) {
     e.preventDefault();
-    const ok = unlockWithPassphrase(pass);
+    // Quick path from auth panel: secondConfirm true so users aren't double-blocked
+    const ok = unlockWithPassphrase(pass, true);
     setMsg(
       ok
-        ? "Unlocked (simulated)."
+        ? "Airlock open (simulated)."
         : "Unlock failed — check passphrase / biometric match.",
     );
     if (ok) setPass("");
@@ -49,16 +49,15 @@ export function AuthPanel() {
           <dd>{auth.locked ? "Locked" : "Open"}</dd>
         </div>
         <div>
-          <dt className="guard-label">Privacy gate</dt>
-          <dd>
-            {privacy.gateActive
-              ? privacy.unlocked
-                ? "Unlocked"
-                : "Active"
-              : "Off"}
-          </dd>
+          <dt className="guard-label">Airlock</dt>
+          <dd className="capitalize">{privacy.mode.replace("_", " ")}</dd>
         </div>
       </dl>
+
+      <p className="text-xs text-guard-muted">
+        Prefer the <strong>Privacy airlock</strong> panel for seal / unlock
+        ceremony. This panel is continuous auth + emergency lock.
+      </p>
 
       <div className="flex flex-wrap gap-2">
         <button
@@ -70,26 +69,17 @@ export function AuthPanel() {
         </button>
         <button
           type="button"
-          className="guard-btn guard-btn-secondary text-sm"
-          onClick={() =>
-            setPrivacy({ gateActive: !privacy.gateActive })
-          }
-        >
-          {privacy.gateActive ? "Disable privacy gate" : "Enable privacy gate"}
-        </button>
-        <button
-          type="button"
           className="guard-btn guard-btn-danger text-sm"
           onClick={lockSession}
         >
-          Lock
+          Lock + seal
         </button>
       </div>
 
       <form onSubmit={onUnlock} className="space-y-2">
         <label className="block space-y-1 text-sm">
           <span className="guard-label">
-            Mental passphrase (demo default:{" "}
+            Quick unlock (demo:{" "}
             <span className="font-mono text-cyan-200">focus</span>)
           </span>
           <input
@@ -102,7 +92,7 @@ export function AuthPanel() {
           />
         </label>
         <button type="submit" className="guard-btn guard-btn-primary w-full sm:w-auto">
-          Unlock session / private classes
+          Unlock (skips second confirm)
         </button>
       </form>
       {msg ? (

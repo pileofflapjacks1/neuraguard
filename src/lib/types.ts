@@ -62,10 +62,16 @@ export interface CognitiveState {
   focus: number;
   fatigue: number;
   agency: number;
-  /** Distribution-shift anomaly score 0–100 */
+  /** Distribution-shift anomaly score 0–100 (EMA-smoothed) */
   anomalyScore: number;
   /** Baseline match for continuous auth 0–100 (higher = more like baseline) */
   biometricMatch: number;
+  /** True when this tick applied online baseline drift adaptation */
+  driftAdapting: boolean;
+  /** Cumulative baseline movement proxy 0–100 (research UI only) */
+  baselineDrift: number;
+  /** Consecutive low-anomaly ticks (drift gate) */
+  stableTicks: number;
 }
 
 export type PolicyActionType =
@@ -76,6 +82,7 @@ export type PolicyActionType =
   | "force_break"
   | "pause_sensitive"
   | "block_private"
+  | "airlock_sealed"
   | "require_unlock"
   | "lock_session";
 
@@ -107,15 +114,37 @@ export interface PolicyThresholds {
   forceBreakMs: number;
 }
 
+/**
+ * Privacy airlock mode (0.3+).
+ * - sealed: default-deny private + block untrusted outbound sinks
+ * - public_only: private blocked; local export allowed (redacted)
+ * - unlocked: private classes may pass gated stream (still sim-only)
+ */
+export type PrivacyMode = "sealed" | "public_only" | "unlocked";
+
 export interface PrivacySettings {
-  /** Classes treated as private (blocked when gate is active) */
+  /** Classes treated as private (blocked when sealed / public_only) */
   privateClasses: IntentClass[];
-  /** When true, private classes are blocked until unlock */
+  /**
+   * @deprecated Prefer `mode`. When true and not unlocked → sealed behavior.
+   */
   gateActive: boolean;
   /** Session unlocked after mental passphrase / secondary confirm */
   unlocked: boolean;
+  /** Explicit airlock mode (wins over gateActive when set consistently via store) */
+  mode: PrivacyMode;
   /** Simulated mental passphrase (demo only) */
   mentalPassphrase: string;
+  /** Hide private class labels in UI while sealed */
+  redactLabelsWhenSealed: boolean;
+  /** Always redact private classes from exports even when unlocked */
+  alwaysRedactExports: boolean;
+  /** Drop private samples entirely from exports instead of zeroing */
+  dropPrivateOnExport: boolean;
+  /** Require second confirm checkbox before unlock */
+  requireSecondConfirm: boolean;
+  /** Auto re-seal after unlock (ms); 0 = no auto re-seal */
+  autoRelockMs: number;
 }
 
 export interface AuthState {
@@ -149,6 +178,8 @@ export interface BandwidthState {
   breakForced: boolean;
   sensitivePaused: boolean;
   privateBlocked: boolean;
+  /** Resolved airlock mode this tick */
+  privacyMode: PrivacyMode;
 }
 
 export const DEFAULT_THRESHOLDS: PolicyThresholds = {
@@ -167,7 +198,13 @@ export const DEFAULT_PRIVACY: PrivacySettings = {
   privateClasses: ["inner_speech", "private_thought"],
   gateActive: true,
   unlocked: false,
+  mode: "sealed",
   mentalPassphrase: "focus",
+  redactLabelsWhenSealed: true,
+  alwaysRedactExports: true,
+  dropPrivateOnExport: false,
+  requireSecondConfirm: true,
+  autoRelockMs: 60_000,
 };
 
 export const INTENT_CLASSES: IntentClass[] = [

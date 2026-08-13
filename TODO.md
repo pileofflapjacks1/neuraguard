@@ -1,30 +1,25 @@
 # NeuraGuard TODO
 
-## Done (0.1.0 MVP + Beach polish)
+## Done (0.3.0 Privacy Airlock)
 
-- [x] Scaffold Next.js + Tailwind + Zustand + Recharts
-- [x] Synthetic intention stream + injections
-- [x] CSV load/replay + mock WebSocket
-- [x] Feature extractor + state estimator (documented formulas)
-- [x] Policy engine (throttle, breaks, privacy, lock)
-- [x] Live dashboard, policy editor, history, how-it-works, disclaimer, demo
-- [x] Session log export JSON/CSV
-- [x] Neurabridge adapter stub
-- [x] Unit tests (estimator + policy + features)
-- [x] LISTING.md + neurabeach-manifest.json + README + ROADMAP
-- [x] Catalog screenshots (01–05) + polished OG
-- [x] `/a11y` scorecard (suite parity)
-- [x] `docs/WHAT-IS-NEURAGUARD.md` suite one-pager
-- [x] Absolute demo/a11y/screenshot URLs in LISTING + manifest
+- [x] Privacy modes: sealed · public_only · unlocked
+- [x] Fail-closed gated stream for private classes
+- [x] Outbound sink rules (export / suite bus / WS)
+- [x] Export redaction + SEALED blocks export
+- [x] Unlock ceremony (passphrase + second confirm + auto re-seal)
+- [x] Privacy audit counters + almost-leaked
+- [x] PRIVATE SEALED badge + airlock panel
+- [x] Honest disclaimer language (not implant encryption)
+- [x] Unit tests (airlock + policy + estimator)
 
-## Ship checklist
+## Ship 0.3.0
 
-- [x] First commit + push to `pileofflapjacks1/neuraguard`
-- [x] Deploy Vercel → `https://neuraguard.vercel.app`
-- [x] Smoke live `/demo`, `/a11y`, screenshot URLs (200)
-- [x] Seed NeuraBeach `col-neura-suite` from LISTING + manifest
+- [ ] Commit + push
+- [ ] Redeploy Vercel
+- [ ] Re-seed Beach version/description
 
-## Later
+## Next (privacy roadmap)
 
-- [ ] Optional Neurabridge BroadcastChannel soft-link
-- [ ] Stronger drift adaptation / export crypto (see ROADMAP)
+- [ ] Encrypted local private vault (Web Crypto)
+- [ ] Neurabridge soft-link that never forwards private unless unlocked
+- [ ] Timed release window UI polish / dual-channel unlock

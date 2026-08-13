@@ -6,7 +6,7 @@ You are working on **NeuraGuard only** unless the user asks to edit another suit
 
 Computer-side **continuous neural-state firewall** for high-bandwidth intention streams (MindGuard research name).
 
-**MVP:** 0.1.0 — live simulator, state dashboard, policy engine, privacy gate, session export.
+**MVP:** 0.3.0 — live simulator, privacy airlock (sealed/public/unlocked), policy engine, drift adaptation, session export.
 
 Not implant software. Not medical. Not Neuralink-affiliated.  
 Not Binder (TCG). Not Shell (control plane). Not Beach (catalog). Not RoboBridge (robots).
@@ -15,7 +15,7 @@ Not Binder (TCG). Not Shell (control plane). Not Beach (catalog). Not RoboBridge
 
 | | |
 |--|--|
-| **Path** | `~/Projects/neuraguard` |
+| **Path** | `~/Projects/Neuralink/neuraguard` |
 | **Beach** | `col-neura-suite` · `suite_role: app` |
 | **Inputs** | `velocity_2d`, `class_label`, `synthetic` (+ privacy-aware classes) |
 | **Outputs** | `ui_only`, `file_export` |

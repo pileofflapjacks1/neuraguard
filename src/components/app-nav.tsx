@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { SimulatorBadge } from "./simulator-badge";
+import { PrivacyBadge } from "./privacy-badge";
 
 const LINKS = [
   { href: "/", label: "Live Dashboard" },
@@ -31,6 +32,7 @@ export function AppNav() {
             Continuous neural-state firewall
           </span>
           <SimulatorBadge />
+          <PrivacyBadge />
         </div>
         <nav aria-label="Main" className="flex flex-wrap gap-1">
           {LINKS.map((l) => {

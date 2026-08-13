@@ -192,7 +192,7 @@ class=${lastGated.intentClass} ✓`}
           ) : (
             <span className="text-rose-300/90">
               {lastSample
-                ? `Blocked (${lastSample.intentClass})`
+                ? `Blocked by airlock/policy`
                 : "—"}
             </span>
           )}

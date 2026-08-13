@@ -8,7 +8,7 @@
 |-------|--------|
 | **Slug** | `neuraguard` |
 | **Title** | NeuraGuard |
-| **Version** | `0.1.0` |
+| **Version** | `0.3.0` |
 | **Category** | `research_utility` |
 | **Featured** | yes |
 | **Collection** | `col-neura-suite` |
@@ -36,7 +36,7 @@
 
 ## Short description (catalog card)
 
-> Continuous neural-state awareness and safety layer for intention streams: fatigue manager, privacy gate, adaptive throttle, anomaly pause. Simulator-first MindGuard MVP. Not implant software. Not a medical device. Not affiliated with Neuralink.
+> Continuous neural-state firewall for intention streams: privacy airlock (fail-closed private classes), fatigue manager, adaptive throttle, anomaly pause, online drift adaptation. Simulator-first MindGuard. Not implant software. Not a medical device. Not affiliated with Neuralink.
 
 ---
 

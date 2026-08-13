@@ -1,28 +1,43 @@
 "use client";
 
 import { useGuardStore } from "@/lib/store";
-import { buildExportBundle, exportCsv, exportJson } from "@/lib/export";
+import {
+  buildExportBundle,
+  canExport,
+  exportCsv,
+  exportJson,
+} from "@/lib/export";
 import { formatTime } from "@/lib/utils";
 
 export function SessionLogPanel() {
   const log = useGuardStore((s) => s.log);
   const stateHistory = useGuardStore((s) => s.stateHistory);
   const recentActions = useGuardStore((s) => s.recentActions);
+  const privacy = useGuardStore((s) => s.privacy);
+  const noteExportRedaction = useGuardStore((s) => s.noteExportRedaction);
+  const noteSinkBlock = useGuardStore((s) => s.noteSinkBlock);
 
   function doExportJson() {
+    const check = canExport(privacy);
+    if (!check.allow) {
+      noteSinkBlock(check.reason);
+      return;
+    }
+    const st = useGuardStore.getState();
     const bundle = buildExportBundle(
-      useGuardStore.getState().stateHistory,
-      useGuardStore.getState().recentActions,
-      useGuardStore.getState().log,
+      st.stateHistory,
+      st.recentActions,
+      st.log,
+      st.privacy,
+      st._samples,
     );
-    // Include full policy history from log-derived actions for demo
+    if (bundle.redacted) noteExportRedaction();
     exportJson({
       ...bundle,
       policies: [
         ...recentActions,
-        ...useGuardStore
-          .getState()
-          .log.filter((e) => e.kind === "policy")
+        ...st.log
+          .filter((e) => e.kind === "policy")
           .map((e) => ({
             type: "none" as const,
             reason: e.message,
@@ -34,9 +49,19 @@ export function SessionLogPanel() {
   }
 
   function doExportCsv() {
-    exportCsv(
-      buildExportBundle(stateHistory, recentActions, log),
+    const check = canExport(privacy);
+    if (!check.allow) {
+      noteSinkBlock(check.reason);
+      return;
+    }
+    const bundle = buildExportBundle(
+      stateHistory,
+      recentActions,
+      log,
+      privacy,
     );
+    if (bundle.redacted) noteExportRedaction();
+    exportCsv(bundle);
   }
 
   return (
@@ -48,6 +73,7 @@ export function SessionLogPanel() {
             type="button"
             className="guard-btn guard-btn-secondary text-sm"
             onClick={doExportJson}
+            title="Blocked when airlock is SEALED"
           >
             Export JSON
           </button>
@@ -55,11 +81,17 @@ export function SessionLogPanel() {
             type="button"
             className="guard-btn guard-btn-secondary text-sm"
             onClick={doExportCsv}
+            title="Blocked when airlock is SEALED"
           >
             Export CSV
           </button>
         </div>
       </div>
+      <p className="text-xs text-guard-muted">
+        Exports are blocked in <strong>SEALED</strong> mode.{" "}
+        <strong>Public only</strong> / unlocked allow redacted exports by
+        default.
+      </p>
       <ul
         className="max-h-64 space-y-1 overflow-y-auto text-sm"
         aria-label="Session event log"

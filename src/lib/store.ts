@@ -41,6 +41,15 @@ import {
 import { attemptUnlock } from "@/lib/auth/biometric";
 import { CsvReplay, parseIntentionCsv } from "@/lib/stream/csv-loader";
 import { MockIntentionSocket } from "@/lib/stream/mock-ws";
+import {
+  DEFAULT_AUDIT,
+  decideAirlock,
+  recordBlock,
+  recordExportRedaction,
+  recordSinkBlock,
+  type PrivacyAudit,
+  type PrivacyMode,
+} from "@/lib/privacy/airlock";
 
 const MAX_SAMPLES = 600; // ~30s at 20Hz kept for features; charts use state history
 const MAX_STATE_HISTORY = 600; // ~10 min at 1Hz tick; we tick at 10–20Hz so ~30–60s dense; we'll downsample store pushes
@@ -57,10 +66,14 @@ export interface GuardStore {
   // latest
   lastSample: IntentionSample | null;
   lastGatedSample: IntentionSample | null;
+  /** Display-safe class label (may be REDACTED when sealed) */
+  lastDisplayClass: string | null;
+  lastAirlockReason: string | null;
   features: StreamFeatures | null;
   state: CognitiveState;
   bandwidth: BandwidthState;
   recentActions: PolicyAction[];
+  privacyAudit: PrivacyAudit;
 
   // history
   stateHistory: CognitiveState[];
@@ -80,6 +93,7 @@ export interface GuardStore {
   _csv: CsvReplay | null;
   _ws: MockIntentionSocket | null;
   _timer: ReturnType<typeof setInterval> | null;
+  _relockTimer: ReturnType<typeof setTimeout> | null;
   _tickCount: number;
 
   // actions
@@ -92,12 +106,25 @@ export interface GuardStore {
   setWsUrl: (url: string) => void;
   setThresholds: (partial: Partial<PolicyThresholds>) => void;
   setPrivacy: (partial: Partial<PrivacySettings>) => void;
+  setPrivacyMode: (mode: PrivacyMode) => void;
   togglePrivacyClass: (c: PrivacySettings["privateClasses"][number]) => void;
-  unlockWithPassphrase: (pass: string) => boolean;
+  unlockWithPassphrase: (pass: string, secondConfirm?: boolean) => boolean;
+  sealPrivacy: () => void;
   lockSession: () => void;
   dismissBreak: () => void;
   captureAuthBaseline: () => void;
   loadCsvText: (text: string) => void;
+  setDriftAdaptEnabled: (enabled: boolean) => void;
+  setDriftConfig: (
+    partial: Partial<
+      Pick<
+        EstimatorConfig,
+        "driftAlpha" | "driftAnomalyMax" | "driftStableTicks" | "anomalyAlpha"
+      >
+    >,
+  ) => void;
+  noteExportRedaction: () => void;
+  noteSinkBlock: (reason: string) => void;
   pushLog: (entry: Omit<SessionLogEntry, "t"> & { t?: number }) => void;
   ingestSample: (sample: IntentionSample) => void;
 }
@@ -111,6 +138,9 @@ function initialCognitive(t = Date.now()): CognitiveState {
     agency: 75,
     anomalyScore: 5,
     biometricMatch: 90,
+    driftAdapting: false,
+    baselineDrift: 0,
+    stableTicks: 0,
   };
 }
 
@@ -122,7 +152,13 @@ function initialBandwidth(): BandwidthState {
     breakForced: false,
     sensitivePaused: false,
     privateBlocked: true,
+    privacyMode: "sealed",
   };
+}
+
+function clearRelockTimer(get: () => GuardStore): void {
+  const t = get()._relockTimer;
+  if (t) clearTimeout(t);
 }
 
 export const useGuardStore = create<GuardStore>((set, get) => {
@@ -137,10 +173,13 @@ export const useGuardStore = create<GuardStore>((set, get) => {
 
     lastSample: null,
     lastGatedSample: null,
+    lastDisplayClass: null,
+    lastAirlockReason: null,
     features: null,
     state: initialCognitive(),
     bandwidth: initialBandwidth(),
     recentActions: [],
+    privacyAudit: { ...DEFAULT_AUDIT },
 
     stateHistory: [],
     log: [
@@ -149,6 +188,12 @@ export const useGuardStore = create<GuardStore>((set, get) => {
         kind: "system",
         message:
           "NeuraGuard ready — research simulation only. Not a medical device.",
+      },
+      {
+        t: Date.now(),
+        kind: "privacy",
+        message:
+          "Privacy airlock SEALED by default — private intention classes fail-closed.",
       },
     ],
 
@@ -169,6 +214,7 @@ export const useGuardStore = create<GuardStore>((set, get) => {
     _csv: null,
     _ws: null,
     _timer: null,
+    _relockTimer: null,
     _tickCount: 0,
 
     pushLog: (entry) => {
@@ -201,13 +247,30 @@ export const useGuardStore = create<GuardStore>((set, get) => {
         authLocked,
       );
 
-      const allowed = policyResult.allowClass(sample.intentClass);
+      // Privacy airlock (fail-closed) then policy allowClass
+      const airlock = decideAirlock(
+        sample,
+        s.privacy,
+        policyResult.engine.sessionLocked || s.auth.locked,
+      );
+      const allowed =
+        airlock.allow && policyResult.allowClass(sample.intentClass);
       const throttled = applyBandwidth(
         sample.vx,
         sample.vy,
         sample.clickProb,
         policyResult.bandwidth.factor,
       );
+
+      let privacyAudit = s.privacyAudit;
+      if (!airlock.allow && airlock.isPrivate) {
+        privacyAudit = recordBlock(
+          privacyAudit,
+          airlock.reason,
+          sample.intentClass,
+          sample.t,
+        );
+      }
 
       const gated: IntentionSample | null = allowed
         ? {
@@ -217,6 +280,7 @@ export const useGuardStore = create<GuardStore>((set, get) => {
               ...sample.meta,
               gated: true,
               bandwidth: policyResult.bandwidth.factor,
+              airlock: "pass",
             },
           }
         : null;
@@ -224,7 +288,13 @@ export const useGuardStore = create<GuardStore>((set, get) => {
       // Log new policy actions (dedupe spam: only when type set changes)
       const prevTypes = new Set(s.recentActions.slice(0, 5).map((a) => a.type));
       for (const a of policyResult.actions) {
-        if (a.type === "none" || a.type === "block_private") continue;
+        if (
+          a.type === "none" ||
+          a.type === "block_private" ||
+          a.type === "airlock_sealed"
+        ) {
+          continue;
+        }
         if (!prevTypes.has(a.type)) {
           get().pushLog({
             kind: "policy",
@@ -233,6 +303,23 @@ export const useGuardStore = create<GuardStore>((set, get) => {
             t: a.t,
           });
         }
+      }
+
+      // Sparse privacy block log (every ~20 private blocks)
+      if (
+        !airlock.allow &&
+        airlock.isPrivate &&
+        privacyAudit.blockedPrivateSamples % 20 === 1
+      ) {
+        get().pushLog({
+          kind: "privacy",
+          message: airlock.reason,
+          t: sample.t,
+          data: {
+            almostLeaked: privacyAudit.almostLeaked,
+            mode: policyResult.bandwidth.privacyMode,
+          },
+        });
       }
 
       // Auto-lock on severe biometric drop
@@ -261,10 +348,13 @@ export const useGuardStore = create<GuardStore>((set, get) => {
       set({
         lastSample: sample,
         lastGatedSample: gated,
+        lastDisplayClass: airlock.displayClass,
+        lastAirlockReason: airlock.allow ? null : airlock.reason,
         features,
         state,
         bandwidth: policyResult.bandwidth,
         recentActions: policyResult.actions,
+        privacyAudit,
         stateHistory: history,
         _samples: samples,
         _estimator: {
@@ -390,14 +480,18 @@ export const useGuardStore = create<GuardStore>((set, get) => {
 
     resetSession: () => {
       get().stop();
+      clearRelockTimer(get);
       const estFresh = createEstimatorState({ sessionStart: Date.now() });
       set({
         lastSample: null,
         lastGatedSample: null,
+        lastDisplayClass: null,
+        lastAirlockReason: null,
         features: null,
         state: initialCognitive(),
         bandwidth: initialBandwidth(),
         recentActions: [],
+        privacyAudit: { ...DEFAULT_AUDIT },
         stateHistory: [],
         _samples: [],
         _estimator: estFresh.state,
@@ -411,15 +505,21 @@ export const useGuardStore = create<GuardStore>((set, get) => {
           lastUnlockAt: null,
           failCount: 0,
         },
-        privacy: { ...get().privacy, unlocked: false },
+        privacy: { ...DEFAULT_PRIVACY },
         log: [
           {
             t: Date.now(),
             kind: "system",
             message: "Session reset. Research simulation only.",
           },
+          {
+            t: Date.now(),
+            kind: "privacy",
+            message: "Privacy airlock re-SEALED on reset.",
+          },
         ],
         _tickCount: 0,
+        _relockTimer: null,
       });
     },
 
@@ -455,10 +555,35 @@ export const useGuardStore = create<GuardStore>((set, get) => {
     },
 
     setPrivacy: (partial) => {
-      set((s) => ({ privacy: { ...s.privacy, ...partial } }));
+      set((s) => {
+        const next = { ...s.privacy, ...partial };
+        // Keep mode / unlocked / gateActive consistent
+        if (partial.mode === "unlocked") {
+          next.unlocked = true;
+          next.gateActive = false;
+        } else if (partial.mode === "sealed" || partial.mode === "public_only") {
+          next.unlocked = false;
+          next.gateActive = true;
+        } else if (partial.unlocked === true) {
+          next.mode = "unlocked";
+          next.gateActive = false;
+        } else if (partial.unlocked === false) {
+          next.mode = next.mode === "public_only" ? "public_only" : "sealed";
+          next.gateActive = true;
+        }
+        return { privacy: next };
+      });
       get().pushLog({
         kind: "privacy",
         message: `Privacy settings updated (${Object.keys(partial).join(", ")}).`,
+      });
+    },
+
+    setPrivacyMode: (mode) => {
+      get().setPrivacy({ mode });
+      get().pushLog({
+        kind: "privacy",
+        message: `Privacy airlock mode → ${mode}`,
       });
     },
 
@@ -472,8 +597,15 @@ export const useGuardStore = create<GuardStore>((set, get) => {
       });
     },
 
-    unlockWithPassphrase: (pass) => {
+    unlockWithPassphrase: (pass, secondConfirm = false) => {
       const s = get();
+      if (s.privacy.requireSecondConfirm && !secondConfirm) {
+        get().pushLog({
+          kind: "privacy",
+          message: "Unlock requires second confirm (release private classes).",
+        });
+        return false;
+      }
       const result = attemptUnlock({
         passphrase: pass,
         expected: s.privacy.mentalPassphrase,
@@ -481,6 +613,7 @@ export const useGuardStore = create<GuardStore>((set, get) => {
         minMatch: Math.max(25, s.thresholds.biometricLock - 10),
       });
       if (result.ok) {
+        clearRelockTimer(get);
         set({
           auth: {
             ...s.auth,
@@ -488,14 +621,31 @@ export const useGuardStore = create<GuardStore>((set, get) => {
             lastUnlockAt: Date.now(),
             failCount: 0,
           },
-          privacy: { ...s.privacy, unlocked: true },
+          privacy: {
+            ...s.privacy,
+            unlocked: true,
+            mode: "unlocked",
+            gateActive: false,
+          },
           _policy: { ...s._policy, sessionLocked: false },
         });
         get().pushLog({ kind: "auth", message: result.reason });
         get().pushLog({
           kind: "privacy",
-          message: "Privacy unlock granted for this session (simulated).",
+          message:
+            "Airlock OPEN — private classes may pass gated stream (simulated, computer-side only).",
         });
+        const ms = get().privacy.autoRelockMs;
+        if (ms > 0) {
+          const timer = setTimeout(() => {
+            get().sealPrivacy();
+            get().pushLog({
+              kind: "privacy",
+              message: `Auto re-seal after ${Math.round(ms / 1000)}s unlock window.`,
+            });
+          }, ms);
+          set({ _relockTimer: timer });
+        }
         return true;
       }
       set({
@@ -505,13 +655,41 @@ export const useGuardStore = create<GuardStore>((set, get) => {
       return false;
     },
 
+    sealPrivacy: () => {
+      clearRelockTimer(get);
+      set((s) => ({
+        privacy: {
+          ...s.privacy,
+          mode: "sealed",
+          unlocked: false,
+          gateActive: true,
+        },
+        _relockTimer: null,
+      }));
+      get().pushLog({
+        kind: "privacy",
+        message: "Privacy airlock SEALED — private classes fail-closed.",
+      });
+    },
+
     lockSession: () => {
+      clearRelockTimer(get);
       set((s) => ({
         auth: { ...s.auth, locked: true },
-        privacy: { ...s.privacy, unlocked: false },
+        privacy: {
+          ...s.privacy,
+          unlocked: false,
+          mode: "sealed",
+          gateActive: true,
+        },
         _policy: { ...s._policy, sessionLocked: true },
+        _relockTimer: null,
       }));
       get().pushLog({ kind: "auth", message: "Session locked by user." });
+      get().pushLog({
+        kind: "privacy",
+        message: "Airlock sealed with session lock.",
+      });
     },
 
     dismissBreak: () => {
@@ -543,6 +721,26 @@ export const useGuardStore = create<GuardStore>((set, get) => {
       });
     },
 
+    setDriftAdaptEnabled: (enabled) => {
+      set((s) => ({
+        _estConfig: { ...s._estConfig, driftAdaptEnabled: enabled },
+      }));
+      get().pushLog({
+        kind: "system",
+        message: `Online drift adaptation ${enabled ? "enabled" : "disabled"}.`,
+      });
+    },
+
+    setDriftConfig: (partial) => {
+      set((s) => ({
+        _estConfig: { ...s._estConfig, ...partial },
+      }));
+      get().pushLog({
+        kind: "system",
+        message: `Drift config updated (${Object.keys(partial).join(", ")}).`,
+      });
+    },
+
     loadCsvText: (text) => {
       const samples = parseIntentionCsv(text);
       if (samples.length === 0) {
@@ -560,6 +758,19 @@ export const useGuardStore = create<GuardStore>((set, get) => {
         kind: "stream",
         message: `Loaded ${samples.length} CSV samples.`,
       });
+    },
+
+    noteExportRedaction: () => {
+      set((s) => ({
+        privacyAudit: recordExportRedaction(s.privacyAudit),
+      }));
+    },
+
+    noteSinkBlock: (reason) => {
+      set((s) => ({
+        privacyAudit: recordSinkBlock(s.privacyAudit, reason),
+      }));
+      get().pushLog({ kind: "privacy", message: reason });
     },
   };
 });

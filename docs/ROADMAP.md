@@ -4,11 +4,12 @@ One-page note of natural extensions beyond MVP 0.1. Research / simulation framin
 
 ## Near-term
 
-- **Real drift adaptation** — online baseline updates that track slow non-stationarity without false anomaly storms.
+- ~~**Real drift adaptation**~~ — **shipped in 0.2.0** (online baseline EMA + anomaly freeze gate).
 - **Stronger privacy crypto** — optional local encryption for session exports; zero-knowledge style “private class” commitments (still computer-side only).
 - **Neurabridge live soft-link** — BroadcastChannel / WS adapter against a running Neurabridge instance (optional dep, never hard-required).
 - **NeuraShell status channel** — publish policy hints (throttle factor, freeze suggest) for Shell to surface in the control plane.
 - **Richer CSV schema** — multi-channel research streams with documented column profiles.
+- **Local threshold profiles** — localStorage presets for policy thresholds.
 
 ## Medium-term
 
