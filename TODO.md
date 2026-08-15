@@ -16,7 +16,7 @@
 
 - [x] Commit + push
 - [x] Redeploy Vercel
-- [ ] Re-seed Beach version/description
+- [x] Re-seed Beach version/description
 
 ## Next (privacy roadmap)
 
